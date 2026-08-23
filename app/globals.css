@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-slate-950 text-slate-200 antialiased;
+}
+
+::selection {
+  @apply bg-indigo-500/40 text-white;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-700;
+}
+*::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-600;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- reusable pieces ---------- */
+
+.card {
+  @apply rounded-2xl border border-slate-800 bg-slate-900/60 p-6;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 py-2.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-400 hover:shadow-indigo-400/30 active:scale-[0.98];
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-5 py-2.5 font-medium text-slate-300 transition hover:border-slate-500 hover:text-white active:scale-[0.98];
+}
+
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800/60 px-3 py-1 text-xs text-slate-300;
+}
+
+.term-en {
+  @apply ml-1.5 inline-block translate-y-[-1px] rounded border border-dashed border-indigo-400/50 bg-indigo-500/10 px-1.5 py-px align-middle font-mono text-[0.72em] font-normal text-indigo-300;
+}
+
+.code-inline {
+  @apply rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[0.88em] text-emerald-300;
+}
+
+.editor-area {
+  @apply h-full w-full resize-none bg-transparent p-4 font-mono text-[13px] leading-6 text-slate-200 outline-none;
+  tab-size: 2;
+}
+
+/* lesson typography (scoped) */
+.lesson p {
+  @apply mb-4 leading-7 text-slate-300;
+}
+.lesson strong {
+  @apply font-semibold text-white;
+}
+.lesson ul {
+  @apply mb-4 list-disc space-y-1.5 pl-6 leading-7 text-slate-300 marker:text-indigo-400;
+}
+.lesson ol {
+  @apply mb-4 list-decimal space-y-1.5 pl-6 leading-7 text-slate-300 marker:text-indigo-400;
+}
+.lesson h2 {
+  @apply mt-12 mb-4 flex items-center gap-2.5 text-2xl font-bold text-white;
+}
+.lesson h2::before {
+  content: "";
+  @apply inline-block h-6 w-1.5 rounded-full bg-gradient-to-b from-indigo-400 to-violet-500;
+}
+.lesson h3 {
+  @apply mt-8 mb-3 text-lg font-semibold text-slate-100;
+}
+.lesson code:not(.code-inline) {
+  @apply rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[0.86em] text-emerald-300;
+}
+
+/* code block listing */
+.codeblock {
+  @apply mb-4 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900 p-4 font-mono text-[13px] leading-6 text-slate-300;
+}
+.codeblock .tag {
+  @apply text-sky-300;
+}
+.codeblock .attr {
+  @apply text-violet-300;
+}
+.codeblock .val {
+  @apply text-emerald-300;
+}
+.codeblock .com {
+  @apply text-slate-500;
+}
+
+/* ---------- animations ---------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-fade-up {
+  animation: fade-up 0.45s ease both;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.anim-float {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.anim-pop {
+  animation: pop-in 0.35s ease both;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.flow-line {
+  stroke-dasharray: 6 6;
+  animation: dash-flow 1s linear infinite;
+}
+
+/* celebration confetti */
+.confetti-piece {
+  position: absolute;
+  top: -16px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: cc-fall 2.4s ease-in forwards;
+}
+@keyframes cc-fall {
+  to {
+    transform: translateY(360px) rotate(560deg);
+    opacity: 0.15;
+  }
+}
