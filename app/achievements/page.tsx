@@ -9,7 +9,10 @@ const RING_C = 2 * Math.PI * RING_R;
 
 export default function AchievementsPage() {
   const { xp, level, xpInLevel, completed, badges, resetAll, hydrated } = useProgress();
-  const doneCount = MODULES.filter((m) => m.status === "live").flatMap((m) => m.lessons).filter((l) => completed.includes(`m1/${l.slug}`)).length;
+  const doneCount = MODULES
+    .filter((m) => m.status === "live")
+    .flatMap((m) => m.lessons.map((l) => `${m.id}/${l.slug}`))
+    .filter((id) => completed.includes(id)).length;
 
   return (
     <main className="mx-auto max-w-4xl px-4 pb-24 pt-10">

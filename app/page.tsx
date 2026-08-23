@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MODULES, lessonHref } from "@/lib/curriculum";
+import { MODULES, TOTAL_LIVE_LESSONS, lessonHref } from "@/lib/curriculum";
 
 const FEATURES = [
   {
@@ -64,7 +64,7 @@ export default function HomePage() {
             <div className="mt-10 grid max-w-md grid-cols-3 gap-3 text-center">
               {[
                 { n: "6", l: "大模块" },
-                { n: "9", l: "节精品课已上线" },
+                { n: String(TOTAL_LIVE_LESSONS), l: "节精品课已上线" },
                 { n: "4", l: "种互动形式" },
               ].map((s) => (
                 <div key={s.l} className="rounded-xl border border-slate-800 bg-slate-900/50 px-2 py-3">

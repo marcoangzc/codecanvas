@@ -21,6 +21,11 @@ export const BADGES: BadgeDef[] = [
   { id: "first-step", icon: "🌱", name: "初来乍到", en: "First Step", desc: "完成你的第一节课" },
   { id: "halfway", icon: "⛰️", name: "行百里者", en: "Halfway Hero", desc: "完成 5 节课程" },
   { id: "module-m1", icon: "🏅", name: "网页基础通关", en: "Foundations Clear", desc: "完成第 1 模块全部课程" },
+  { id: "module-m2", icon: "⚡", name: "JS 思维通关", en: "JavaScript Clear", desc: "完成第 2 模块全部课程" },
+  { id: "module-m3", icon: "🧩", name: "React 入门通关", en: "React Initiate", desc: "完成第 3 模块全部课程" },
+  { id: "module-m4", icon: "🛠️", name: "后端之门通关", en: "Backend Gate", desc: "完成第 4 模块全部课程" },
+  { id: "module-m5", icon: "🗄️", name: "数据库通关", en: "Database Clear", desc: "完成第 5 模块全部课程" },
+  { id: "module-m6", icon: "🚀", name: "全栈毕业", en: "Full-Stack Graduate", desc: "完成毕业挑战，走完全部旅程" },
   { id: "server-handshake", icon: "🤝", name: "服务器握手", en: "Server Handshake", desc: "第一次成功调用服务端校验 API" },
   { id: "perfectionist", icon: "💎", name: "一次成型", en: "Perfectionist", desc: "结课挑战第一次提交就全部通过" },
 ];
@@ -119,13 +124,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           nextBadges.add("halfway");
           queue.push(() => pushToast("⛰️", "成就解锁：行百里者", "Halfway Hero"));
         }
-        const m1 = MODULES[0];
-        const m1Done = m1.lessons.every((l) => completed.includes(`${m1.id}/${l.slug}`));
-        if (m1Done && !nextBadges.has("module-m1")) {
-          nextBadges.add("module-m1");
-          queue.push(() =>
-            pushToast("🏅", "成就解锁：网页基础通关", "Web Foundations Clear"),
-          );
+        // 每个模块的全部课程都完成 → 解锁对应「通关」徽章
+        for (const mod of MODULES) {
+          const badgeId = `module-${mod.id}`;
+          const def = BADGES.find((b) => b.id === badgeId);
+          if (!def || nextBadges.has(badgeId)) continue;
+          const allDone = mod.lessons.every((l) => completed.includes(`${mod.id}/${l.slug}`));
+          if (!allDone) continue;
+          nextBadges.add(badgeId);
+          queue.push(() => pushToast(def.icon, `成就解锁：${def.name}`, def.en));
         }
         // fire toasts outside the reducer
         setTimeout(() => queue.forEach((f) => f()), 0);

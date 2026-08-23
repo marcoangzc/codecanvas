@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Callout from "@/components/Callout";
 import Challenge from "@/components/Challenge";
-import { CAPSTONE_CHECKS } from "@/lib/checks";
+import { getChecksForLesson } from "@/lib/checks";
+
+const CAPSTONE_CHECKS = getChecksForLesson("m1/capstone") ?? [];
 
 const STARTER = `<!DOCTYPE html>
 <html lang="zh-CN">

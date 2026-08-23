@@ -90,8 +90,8 @@ export default function CurriculumPage() {
         <div className="text-2xl">🗺️</div>
         <h3 className="mt-2 font-bold text-white">路线会持续生长</h3>
         <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-400">
-          第 1 模块已经可以完整学习；后续模块会以同样的「可视化 + 实战」标准逐步上线。
-          现在就从第一课开始吧！
+          六大模块全部上线，从第一行 HTML 一直陪你到毕业挑战。
+          还没出发？现在就是最好的时机！
         </p>
         <Link href={lessonHref("m1", "how-web-works")} className="btn-primary mt-4 px-6 py-2.5">
           🚀 开始第一课

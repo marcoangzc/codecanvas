@@ -28,8 +28,42 @@ const CONSOLE_SHIM = `<script>(function(){
   window.addEventListener("error", function(ev){ send("error", [ev.message]); });
 })();<\/script>`;
 
-function buildDoc(html: string, css: string, js: string): string {
+/** React 模式所需的 CDN（UMD 版，无需构建工具即可在浏览器里跑 JSX） */
+const REACT_CDN = [
+  `<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"><\/script>`,
+  `<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"><\/script>`,
+  `<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"><\/script>`,
+];
+
+function buildDoc(
+  html: string,
+  css: string,
+  js: string,
+  mode: "web" | "react",
+  apiBase: string,
+): string {
   const safeJs = js.replace(/<\/script/gi, "<\\/script");
+  // 预置在 window 上而非裸变量：学习者自己写 const API_BASE 时不会冲突
+  const apiShim = `<script>window.API_BASE = ${JSON.stringify(apiBase)};<\/script>`;
+
+  if (mode === "react") {
+    return [
+      "<!DOCTYPE html><html><head><meta charset='utf-8'>",
+      "<style>",
+      css,
+      "</style>",
+      ...REACT_CDN,
+      "</head><body>",
+      '<div id="root"></div>',
+      CONSOLE_SHIM,
+      apiShim,
+      `<script type="text/babel" data-presets="react">`,
+      "var exports = {};",
+      safeJs,
+      "<\/script></body></html>",
+    ].join("\n");
+  }
+
   return [
     "<!DOCTYPE html><html><head><meta charset='utf-8'>",
     "<style>",
@@ -37,40 +71,58 @@ function buildDoc(html: string, css: string, js: string): string {
     "</style></head><body>",
     html,
     CONSOLE_SHIM,
+    apiShim,
     js.trim() ? "<script>" + safeJs + "<\/script>" : "",
     "</body></html>",
   ].join("\n");
 }
 
-const TABS: { key: TabKey; label: string }[] = [
+const TABS_WEB: { key: TabKey; label: string }[] = [
   { key: "html", label: "HTML" },
   { key: "css", label: "CSS" },
   { key: "js", label: "JS" },
 ];
+const TABS_REACT: { key: TabKey; label: string }[] = [
+  { key: "js", label: "JSX" },
+  { key: "css", label: "CSS" },
+];
 
 /**
- * 实时代码演练场：左边编辑 HTML/CSS/JS，右边 iframe 实时预览 + 控制台输出。
+ * 实时代码演练场：左边编辑代码，右边 iframe 实时预览 + 控制台输出。
+ *
+ * mode="web"   —— HTML/CSS/JS 三标签，经典网页三件套。
+ * mode="react" —— 只有 JSX/CSS 两块，iframe 里已备好 React 18 + Babel，
+ *                 学习者直接写组件并 createRoot 挂载，无需任何构建工具；
+ *                 window.API_BASE 已指向本站，可现场调用真实接口。
  */
 export default function CodePlayground({
-  initialHtml,
+  initialHtml = "",
   initialCss = "",
   initialJs = "",
+  /** react 模式下 JSX 起始代码（initialJs 的语义化别名） */
+  initialJsx,
+  mode = "web",
   height = 260,
   caption,
   tasks,
 }: {
-  initialHtml: string;
+  initialHtml?: string;
   initialCss?: string;
   initialJs?: string;
+  initialJsx?: string;
+  /** react 模式下省略 initialHtml */
+  mode?: "web" | "react";
   height?: number;
   caption?: string;
   tasks?: string[];
 }) {
+  const js0 = initialJsx ?? initialJs;
   const [html, setHtml] = useState(initialHtml);
   const [css, setCss] = useState(initialCss);
-  const [js, setJs] = useState(initialJs);
-  const [tab, setTab] = useState<TabKey>("html");
-  const [doc, setDoc] = useState(() => buildDoc(initialHtml, initialCss, initialJs));
+  const [js, setJs] = useState(js0);
+  const [tab, setTab] = useState<TabKey>(mode === "react" ? "js" : "html");
+  const [apiBase] = useState(() => (typeof window === "undefined" ? "" : window.location.origin));
+  const [doc, setDoc] = useState(() => buildDoc(initialHtml, initialCss, js0, mode, apiBase));
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -78,13 +130,13 @@ export default function CodePlayground({
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      setDoc(buildDoc(html, css, js));
+      setDoc(buildDoc(html, css, js, mode, apiBase));
       setLogs([]);
     }, 500);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [html, css, js]);
+  }, [html, css, js, mode, apiBase]);
 
   // 接收 iframe 内部的 console 输出
   useEffect(() => {
@@ -100,6 +152,7 @@ export default function CodePlayground({
 
   const setters = { html: setHtml, css: setCss, js: setJs } as const;
   const values = { html, css, js } as const;
+  const tabs = mode === "react" ? TABS_REACT : TABS_WEB;
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key !== "Tab") return;
@@ -116,9 +169,9 @@ export default function CodePlayground({
       {/* 工具栏 */}
       <div className="flex items-center gap-1 border-b border-slate-800 bg-slate-900 px-3 py-2">
         <span className="mr-2 hidden text-xs font-semibold tracking-wide text-slate-500 sm:block">
-          ⌨️ 演练场 · 实时生效
+          ⌨️ 演练场 · 实时生效{mode === "react" ? " · React 已就绪" : ""}
         </span>
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
@@ -133,7 +186,7 @@ export default function CodePlayground({
           onClick={() => {
             setHtml(initialHtml);
             setCss(initialCss);
-            setJs(initialJs);
+            setJs(js0);
             setLogs([]);
           }}
           className="ml-auto rounded-lg px-3 py-1.5 text-xs text-slate-400 transition hover:text-white"
