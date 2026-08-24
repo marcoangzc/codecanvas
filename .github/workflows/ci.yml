@@ -1,0 +1,22 @@
+name: CI
+
+# 每次推送 / PR 都完整跑一遍生产构建：
+# 40 节课全部静态生成，任何一节课写坏了都会在这里第一时间暴露。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: 安装依赖
+        run: bun install --frozen-lockfile
+
+      - name: 生产构建
+        run: bun run build
